@@ -1,0 +1,97 @@
+@font-face {
+  font-family: "Inter";
+  src: url("/assets/fonts/Inter-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("/assets/fonts/Inter-SemiBold.otf") format("opentype");
+  font-weight: 600;
+  font-display: swap;
+}
+
+:root {
+  --fundo: #f4eee2;
+  --superficie: #fbf7ee;
+  --borda: #e3d9c4;
+  --texto: #2b2723;
+  --suave: #6b6257;
+  --verde: #2f5d3a;
+  --ambar: #9a5f12;
+  --erro: #a33a2a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font: 400 16px/1.5 "Inter", system-ui, sans-serif;
+}
+
+a { color: var(--verde); }
+
+.topo {
+  height: 72px;
+  padding: 0 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--borda);
+}
+.marca { font-size: 18px; font-weight: 600; color: var(--texto); text-decoration: none; }
+.link {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font: inherit; font-size: 15px; font-weight: 600; color: var(--verde);
+}
+
+.miolo { display: flex; justify-content: center; padding: 56px 24px; }
+
+.cartao {
+  width: 440px;
+  max-width: 100%;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 16px;
+  padding: 40px;
+}
+.cartao.largo { width: 640px; }
+.cartao h1 { margin: 0 0 8px; font-size: 28px; line-height: 34px; font-weight: 600; }
+.cartao h2 { margin: 28px 0 12px; font-size: 16px; font-weight: 600; }
+.rotulo { margin: 0 0 8px; font-size: 13px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ambar); }
+.suave { color: var(--suave); font-size: 15px; margin: 0; }
+
+.campo { margin-bottom: 20px; }
+.campo label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 600; }
+.campo input {
+  width: 100%; height: 44px; padding: 0 14px;
+  border: 1px solid #cdbfa8; border-radius: 8px; background: #fffdf8;
+  font: inherit;
+}
+.campo input:focus { outline: 2px solid var(--verde); outline-offset: 1px; }
+
+.botao {
+  width: 100%; height: 48px; border: 0; border-radius: 8px;
+  background: var(--verde); color: #fff;
+  font: inherit; font-weight: 600; cursor: pointer;
+}
+.botao:disabled { opacity: 0.6; cursor: wait; }
+
+.erro-form { margin: 0 0 16px; font-size: 14px; color: var(--erro); }
+
+.tarefas { margin: 0; padding-left: 20px; }
+.tarefas li { margin-bottom: 8px; }
+
+.lista-labs { list-style: none; margin: 24px 0 0; padding: 0; display: grid; gap: 16px; }
+.lista-labs li { background: #ebe3d3; border: 1px solid var(--borda); border-radius: 12px; padding: 20px 24px; }
+.lista-labs h2 { margin: 0 0 4px; font-size: 18px; }
+.lista-labs p { margin: 0 0 8px; color: var(--suave); font-size: 15px; }
+.lista-labs code { font-size: 14px; }
+
+@media (max-width: 600px) {
+  .topo { padding: 0 20px; height: 56px; }
+  .miolo { padding: 24px 16px; }
+  .cartao { padding: 24px; }
+}

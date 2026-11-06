@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design de referência: cadastro</title>
+<style>
+@font-face { font-family: "Inter"; src: url("../../public/assets/fonts/Inter-Regular.otf") format("opentype"); font-weight: 400; }
+@font-face { font-family: "Inter"; src: url("../../public/assets/fonts/Inter-SemiBold.otf") format("opentype"); font-weight: 600; }
+
+* { box-sizing: border-box; }
+body { margin: 0; background: #f4eee2; color: #2b2723; font: 400 16px/1.5 "Inter", system-ui, sans-serif; }
+
+.topo { height: 72px; padding: 0 48px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e3d9c4; }
+.marca { font-size: 18px; font-weight: 600; color: #2b2723; text-decoration: none; }
+.entrar { font-size: 15px; font-weight: 600; color: #2f5d3a; text-decoration: none; }
+
+.miolo { display: flex; justify-content: center; padding: 56px 24px; }
+.cartao { width: 480px; max-width: 100%; background: #fbf7ee; border: 1px solid #e3d9c4; border-radius: 16px; padding: 40px; }
+.cartao[hidden] { display: none; }
+
+h1 { margin: 0 0 8px; font-size: 28px; line-height: 34px; font-weight: 600; }
+.sub { margin: 0 0 28px; font-size: 15px; line-height: 22px; color: #6b6257; }
+
+.campo { margin-bottom: 20px; }
+.campo label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 600; }
+.campo .controle { display: block; width: 100%; height: 44px; padding: 0 14px; border: 1px solid #cdbfa8; border-radius: 8px; background: #fffdf8; color: #2b2723; font: inherit; line-height: 42px; }
+.campo .controle.vazio { color: #8f8574; }
+.campo.invalido .controle { border-color: #a33a2a; }
+.ajuda { margin: 6px 0 0; font-size: 13px; line-height: 18px; color: #6b6257; }
+.msg-erro { margin: 6px 0 0; font-size: 13px; line-height: 18px; color: #a33a2a; }
+
+.termos { margin: 4px 0 24px; }
+.termos-linha { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.caixa { width: 18px; height: 18px; border: 1px solid #cdbfa8; border-radius: 4px; background: #fffdf8; display: inline-flex; align-items: center; justify-content: center; }
+.caixa.marcada { background: #2f5d3a; border-color: #2f5d3a; }
+.caixa.marcada svg { display: block; }
+.caixa svg { display: none; }
+.termos.invalido .caixa { border-color: #a33a2a; }
+
+.botao { display: block; width: 100%; height: 48px; line-height: 48px; border-radius: 8px; background: #2f5d3a; color: #ffffff; text-align: center; font-size: 16px; font-weight: 600; text-decoration: none; }
+.rodape { margin: 20px 0 0; text-align: center; font-size: 14px; color: #6b6257; }
+.rodape a { color: #2f5d3a; font-weight: 600; text-decoration: none; }
+
+.sucesso { text-align: center; }
+.selo { width: 56px; height: 56px; margin: 0 auto 24px; border-radius: 50%; background: #e4eddd; display: flex; align-items: center; justify-content: center; }
+.sucesso .sub { margin-bottom: 32px; }
+
+@media (max-width: 600px) {
+  .topo { padding: 0 20px; height: 56px; }
+  .miolo { padding: 24px 16px; }
+  .cartao { padding: 24px; border-radius: 12px; }
+}
+</style>
+</head>
+<body>
+<header class="topo">
+  <a class="marca" href="#">Loja Terra</a>
+  <a class="entrar" href="#">Entrar</a>
+</header>
+
+<main class="miolo">
+  <section class="cartao" id="form">
+    <h1>Criar conta</h1>
+    <p class="sub">Leva menos de um minuto.</p>
+
+    <div class="campo" id="c-nome">
+      <label>Nome completo</label>
+      <span class="controle" id="v-nome"></span>
+      <p class="msg-erro" id="e-nome" hidden>Informe seu nome completo.</p>
+    </div>
+
+    <div class="campo" id="c-email">
+      <label>E-mail</label>
+      <span class="controle" id="v-email"></span>
+      <p class="msg-erro" id="e-email" hidden>Informe um e-mail válido.</p>
+      <p class="ajuda" id="ajuda-email">Usaremos para enviar a confirmação.</p>
+    </div>
+
+    <div class="campo" id="c-telefone">
+      <label>Telefone</label>
+      <span class="controle" id="v-telefone"></span>
+      <p class="msg-erro" id="e-telefone" hidden>Informe um telefone com DDD.</p>
+    </div>
+
+    <div class="campo" id="c-estado">
+      <label>Estado</label>
+      <span class="controle" id="v-estado"></span>
+      <p class="msg-erro" id="e-estado" hidden>Selecione um estado.</p>
+    </div>
+
+    <div class="campo termos" id="c-termos">
+      <div class="termos-linha">
+        <span class="caixa" id="caixa"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6.5l2.5 2.5L10 3.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span>Aceito os termos</span>
+      </div>
+      <p class="msg-erro" id="e-termos" hidden>É preciso aceitar os termos.</p>
+    </div>
+
+    <span class="botao">Criar conta</span>
+    <p class="rodape">Já tem conta? <a href="#">Entrar</a></p>
+  </section>
+
+  <section class="cartao sucesso" id="sucesso" hidden>
+    <div class="selo"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M5 13.5l5.5 5.5L21 8" stroke="#2f5d3a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <h1>Cadastro enviado</h1>
+    <p class="sub">Enviamos um e-mail de confirmação para maria.souza@exemplo.com.</p>
+    <span class="botao">Voltar ao início</span>
+  </section>
+</main>
+
+<script>
+// Estados do design: vazio, preenchido, erro e sucesso (?estado=...)
+const estado = new URLSearchParams(location.search).get('estado') || 'vazio';
+const $ = (id) => document.getElementById(id);
+
+function valor(id, texto, marcador) {
+  const el = $('v-' + id);
+  el.textContent = texto || marcador;
+  el.classList.toggle('vazio', !texto);
+}
+
+const dados = estado === 'preenchido'
+  ? { nome: 'Maria Souza', email: 'maria.souza@exemplo.com', telefone: '(11) 91234-5678', estado: 'São Paulo' }
+  : estado === 'erro'
+    ? { nome: '', email: 'maria.souza@', telefone: '', estado: '' }
+    : { nome: '', email: '', telefone: '', estado: '' };
+
+valor('nome', dados.nome, 'Maria Souza');
+valor('email', dados.email, 'nome@exemplo.com');
+valor('telefone', dados.telefone, '(11) 91234-5678');
+valor('estado', dados.estado, 'Selecione');
+
+if (estado === 'preenchido') $('caixa').classList.add('marcada');
+
+if (estado === 'erro') {
+  for (const campo of ['nome', 'email', 'telefone', 'estado', 'termos']) {
+    $('c-' + campo).classList.add('invalido');
+    $('e-' + campo).hidden = false;
+  }
+  $('ajuda-email').hidden = true;
+}
+
+if (estado === 'sucesso') {
+  $('form').hidden = true;
+  $('sucesso').hidden = false;
+}
+</script>
+</body>
+</html>

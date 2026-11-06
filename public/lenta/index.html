@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Produtos - Loja Terra</title>
+<!-- Script síncrono e pesado no head: bloqueia a renderização -->
+<script src="analytics-pesado.js"></script>
+<!-- Folha de estilo principal, lenta, que bloqueia a renderização -->
+<link rel="stylesheet" href="tema.css">
+<!-- Fonte carregada sem estratégia de exibição (texto invisível até chegar) -->
+<style>
+@font-face {
+  font-family: "InterLenta";
+  src: url("fonte-lenta.otf") format("opentype");
+  font-display: block;
+}
+</style>
+</head>
+<body>
+<header class="topo">
+  <a class="marca" href="/">Loja Terra</a>
+  <nav><a href="/cadastro/">Criar conta</a><a href="/login/">Entrar</a></nav>
+</header>
+
+<section class="destaque">
+  <img src="img/hero.jpg" alt="Louças e utensílios de cerâmica sobre uma bancada">
+  <div class="destaque-texto">
+    <h1>Peças de cerâmica feitas à mão</h1>
+    <p>Louças e utensílios para a mesa de todos os dias.</p>
+  </div>
+</section>
+
+<main class="conteudo">
+  <h2>Produtos</h2>
+  <ul id="lista" class="grade"></ul>
+</main>
+
+<script src="lenta.js"></script>
+</body>
+</html>

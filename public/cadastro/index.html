@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cadastro - Loja Terra</title>
+<link rel="stylesheet" href="cadastro.css">
+</head>
+<body>
+<header class="topo">
+  <a class="marca" href="/">Loja Terra</a>
+  <a class="entrar" href="/login/">Entrar</a>
+</header>
+
+<main class="miolo">
+  <section class="cartao" id="cartao-form">
+    <h1>Cadastro</h1>
+    <p class="sub">Preencha os dados abaixo.</p>
+
+    <form id="form" novalidate>
+      <div class="campo">
+        <label for="nome">Nome completo</label>
+        <input id="nome" name="nome" type="text" autocomplete="name">
+        <p class="msg-erro" id="erro-nome" role="alert" hidden></p>
+      </div>
+
+      <div class="campo">
+        <label for="email">E-mail</label>
+        <input id="email" name="email" type="email" autocomplete="email">
+        <p class="msg-erro" id="erro-email" role="alert" hidden></p>
+      </div>
+
+      <div class="campo">
+        <label>Telefone</label>
+        <input id="telefone" name="telefone" type="tel" autocomplete="tel" placeholder="Telefone">
+        <p class="msg-erro" id="erro-telefone" role="alert" hidden></p>
+      </div>
+
+      <div class="campo">
+        <label for="estado">Estado</label>
+        <select id="estado" name="estado">
+          <option value="">Estado</option>
+        </select>
+        <p class="msg-erro" id="erro-estado" role="alert" hidden></p>
+      </div>
+
+      <div class="campo termos">
+        <label class="termos-linha">
+          <input id="termos" name="termos" type="checkbox">
+          <span>Aceito os termos</span>
+        </label>
+        <p class="msg-erro" id="erro-termos" role="alert" hidden></p>
+      </div>
+
+      <button class="botao" type="submit" id="enviar">Enviar</button>
+    </form>
+  </section>
+
+  <section class="cartao" id="cartao-sucesso" hidden>
+    <h1>Cadastro enviado</h1>
+    <p class="sub" id="texto-sucesso"></p>
+    <a class="botao-link" href="/">Voltar</a>
+  </section>
+</main>
+
+<script src="cadastro.js"></script>
+</body>
+</html>

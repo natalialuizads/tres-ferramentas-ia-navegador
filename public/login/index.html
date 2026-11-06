@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entrar - Loja Terra</title>
+<link rel="stylesheet" href="/assets/base.css">
+</head>
+<body>
+<header class="topo">
+  <a class="marca" href="/">Loja Terra</a>
+  <a class="link" href="/cadastro/">Criar conta</a>
+</header>
+<main class="miolo">
+  <section class="cartao">
+    <h1>Entrar</h1>
+    <p class="suave" style="margin-bottom: 28px">Acesse o painel com uma conta de teste.</p>
+    <form id="form" novalidate>
+      <p class="erro-form" id="erro" role="alert" hidden></p>
+      <div class="campo">
+        <label for="email">E-mail</label>
+        <input id="email" name="email" type="email" autocomplete="username">
+      </div>
+      <div class="campo">
+        <label for="senha">Senha</label>
+        <input id="senha" name="senha" type="password" autocomplete="current-password">
+      </div>
+      <button class="botao" type="submit" id="entrar">Entrar</button>
+    </form>
+  </section>
+</main>
+<script>
+const form = document.getElementById('form');
+const erro = document.getElementById('erro');
+const botao = document.getElementById('entrar');
+
+form.addEventListener('submit', async (evento) => {
+  evento.preventDefault();
+  erro.hidden = true;
+  botao.disabled = true;
+  try {
+    const resposta = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: form.email.value.trim(),
+        senha: form.senha.value,
+      }),
+    });
+    if (resposta.ok) {
+      location.href = '/painel';
+      return;
+    }
+    const corpo = await resposta.json().catch(() => ({}));
+    erro.textContent = corpo.erro || 'Não foi possível entrar.';
+    erro.hidden = false;
+  } catch {
+    erro.textContent = 'Falha de conexão. Tente novamente.';
+    erro.hidden = false;
+  } finally {
+    botao.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

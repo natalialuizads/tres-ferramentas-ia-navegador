@@ -1,0 +1,12 @@
+{
+  "name": "laboratorio-agentes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Projeto de exemplo para praticar Playwright MCP, Chrome DevTools MCP e Agent Browser",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
