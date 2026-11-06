@@ -15,9 +15,9 @@ O servidor sobe em `http://localhost:3000`. Para usar outra porta: `PORT=4000 no
 
 ## A aula
 
-A apresentação fica em `apresentacao/index.html`. Abra no navegador: setas navegam, `N` abre as notas do apresentador, `F` tela cheia.
+A apresentação fica em `docs/index.html`, e também está publicada em https://natalialuizads.github.io/tres-ferramentas-ia-navegador/. Abra no navegador: setas navegam, `N` abre as notas do apresentador, `F` tela cheia.
 
-São 21 slides feitos para quem **nunca viu nenhuma das três ferramentas**. A aula responde, nesta ordem: o que a IA enxerga de uma página, o que é um servidor MCP e como ele difere de um comando de terminal, o que cada ferramenta é e o que ela **não** faz, e qual usar para cada pergunta.
+São 23 slides feitos para quem **nunca viu nenhuma das três ferramentas**. A aula responde, nesta ordem: o que a IA enxerga de uma página, o que é um servidor MCP e como ele difere de um comando de terminal, o que cada ferramenta é e o que ela **não** faz, e qual usar para cada pergunta.
 
 Para demonstrar o cenário 1 sem digitar, o slide "Cole isto no Claude Code" traz um prompt pronto com o botão de copiar. Cole no Claude Code aberto nesta pasta, com o servidor no ar (`node server.js`): ele pede ao Playwright MCP para abrir `/cadastro/`, comparar com `design/cadastro-vazio.png` e responder com uma tabela.
 
@@ -114,7 +114,7 @@ Confira no `--help` os comandos disponíveis na sua versão antes do cenário 3.
 | `medicoes/` | Destino das medições do cenário 2 |
 | `saidas/` | Destino das capturas do cenário 3 |
 | `gabarito/` | Respostas e a versão otimizada da página lenta. Só abra depois de tentar |
-| `apresentacao/` | Os slides da aula (`index.html`) e as imagens que eles usam |
+| `docs/` | Os slides da aula (`index.html`) e as imagens que eles usam. É a pasta que o GitHub Pages publica |
 
 ## Imagens de design
 

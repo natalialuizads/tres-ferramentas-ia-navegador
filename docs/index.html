@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Três ferramentas para uma IA usar um site</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Public+Sans:wght@400;600;700&display=swap">
+<style>
+  :root {
+    --bg: #F7F4EE; --card: #FBF9F4; --line: #E2DACB; --ink: #1E2B23; --muted: #4A5A50;
+    --dark: #1E2B23; --light: #F7F4EE; --soft: #C9D6CC;
+    --terra: #9A4522; --terra-soft: #E0A27E; --green: #2F5D3A; --slate: #3A5A7A;
+    --c1: #B03E14; --c2: #C98A00; --c3: #1F7A52; --c4: #2A5FB0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--dark); overflow: hidden; }
+  body { font-family: 'Public Sans', Arial, sans-serif; color: var(--ink); }
+
+  .deck { position: fixed; inset: 0; }
+  .slide {
+    position: absolute; inset: 0; display: none; flex-direction: column; justify-content: center;
+    gap: clamp(11px, 1.9vh, 22px);
+    padding: clamp(30px, 5.2vh, 68px) clamp(28px, 5.2vw, 92px) clamp(58px, 8.4vh, 90px);
+    background: var(--bg); overflow: hidden;
+  }
+  .slide.active { display: flex; }
+  .slide.dark { background: var(--dark); color: var(--light); }
+
+  h1, h2 { font-family: 'Libre Baskerville', Georgia, serif; font-weight: 700; line-height: 1.1; margin: 0; }
+  h1 { font-size: clamp(38px, 5.4vw, 88px); }
+  h2 { font-size: clamp(26px, 3.3vw, 48px); }
+  p { font-size: clamp(17px, 1.7vw, 25px); line-height: 1.4; margin: 0; }
+  .lead { font-size: clamp(19px, 2vw, 30px); line-height: 1.35; }
+  .muted { color: var(--muted); font-size: clamp(14px, 1.4vw, 20px); }
+  .dark .muted { color: var(--soft); }
+  .eyebrow { font-size: clamp(12px, 1.15vw, 17px); font-weight: 700; letter-spacing: 2.4px; text-transform: uppercase; color: var(--terra); margin: 0; }
+  .dark .eyebrow { color: var(--terra-soft); }
+  .terra-t { color: var(--terra); } .green-t { color: var(--green); } .slate-t { color: var(--slate); }
+  .dark .green-t { color: #86C095; } .dark .slate-t { color: #8FB4D6; } .dark .terra-t { color: var(--terra-soft); }
+  em.k { font-style: normal; background: #EFE4D4; box-shadow: 0 2px 0 var(--terra); padding: 0 4px; }
+
+  code { font-family: 'Courier New', monospace; background: #EAE2D4; padding: 1px 6px; border-radius: 4px; font-size: .9em; }
+  .dark code { background: #33453A; color: var(--light); }
+
+  /* o que a ferramenta faz, em linhas — não em cartões */
+  .defs { display: grid; grid-template-columns: max-content 1fr; gap: 7px clamp(14px, 1.6vw, 26px); align-items: baseline; }
+  .defs dt { font-family: 'Courier New', monospace; font-size: clamp(15px, 1.5vw, 22px); color: var(--ink); white-space: nowrap; }
+  .defs dd { margin: 0; font-size: clamp(16px, 1.6vw, 23px); color: var(--muted); }
+  .lista { margin: 0; padding-left: 1.4em; font-size: clamp(17px, 1.9vw, 27px); line-height: 1.4; color: var(--ink); }
+  .lista li { margin: 0 0 10px; }
+  .lista li::marker { content: "- "; color: var(--terra); font-weight: 700; }
+  .nao { color: var(--terra); font-size: clamp(17px, 1.7vw, 25px); border-left: 3px solid var(--terra); padding-left: 14px; }
+
+  .cmd { position: relative; background: var(--dark); color: var(--light); border-radius: 12px; padding: 14px 88px 14px 20px; }
+  .dark .cmd { background: #11201A; border: 1px solid #3C5147; }
+  .cmd pre { margin: 0; font-family: 'Courier New', ui-monospace, monospace; font-size: clamp(13px, 1.15vw, 18px); line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .copy { position: absolute; top: 8px; right: 8px; font: 700 13px 'Public Sans', Arial, sans-serif; color: var(--light); background: transparent; border: 1px solid #7C8A80; border-radius: 6px; padding: 3px 9px; cursor: pointer; }
+  .copy:hover, .copy:focus-visible { border-color: var(--light); outline: none; }
+
+  .out { background: #FFFDF8; border: 1px solid var(--line); border-left: 6px solid var(--green); border-radius: 10px; padding: 12px 17px; min-width: 0; }
+  .out .lbl { font-size: 13px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1.2px; margin: 0 0 5px; }
+  .out pre { margin: 0; font-family: 'Courier New', ui-monospace, monospace; font-size: clamp(12px, 1.15vw, 17px); line-height: 1.5; white-space: pre-wrap; color: var(--ink); }
+  .out.ruim { border-left-color: var(--terra); }
+  .out.ruim .lbl { color: var(--terra); }
+  .x { color: var(--terra); font-weight: 700; } .v { color: var(--green); font-weight: 700; }
+  .cmd .x { color: #E8927A; } .cmd .v { color: #86C095; }
+
+  .row { display: flex; gap: clamp(13px, 1.9vw, 30px); align-items: flex-start; min-width: 0; }
+  .row.eq > * { flex: 1; min-width: 0; }
+
+  /* tabelas: é aqui que as diferenças ficam claras */
+  table { border-collapse: collapse; width: 100%; font-size: clamp(14px, 1.42vw, 21px); }
+  th, td { text-align: left; padding: 8px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  thead th { font-size: clamp(14px, 1.45vw, 22px); border-bottom: 2px solid var(--ink); }
+  tbody th { font-weight: 400; color: var(--muted); width: 31%; }
+  td.sim { font-weight: 700; }
+  td.destaque { background: #EFE6D8; font-weight: 700; }
+  .t-pw { color: var(--green); } .t-dt { color: var(--slate); } .t-ab { color: var(--terra); }
+
+  .shot { position: relative; overflow: hidden; border-radius: 10px; border: 1px solid var(--line); background: #F2EDE3;
+    height: var(--sh); width: calc(var(--cw) / var(--ch) * var(--sh)); max-width: 100%; }
+  .shot img { position: absolute; display: block; height: calc(900 / var(--ch) * 100%);
+    left: calc(var(--x) / var(--cw) * -100%); top: calc(var(--y) / var(--ch) * -100%); }
+  .shot.p img { height: calc(472 / var(--ch) * 100%); }
+  .cap { font-size: clamp(12px, 1.2vw, 17px); font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; }
+  .center { display: flex; gap: clamp(14px, 2.2vw, 40px); justify-content: center; align-items: flex-start; }
+  .shot-full { align-self: center; max-height: var(--sh); max-width: 100%; width: auto; border-radius: 10px; border: 1px solid var(--line); }
+  .center > div { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+
+  .chart { display: flex; flex-direction: column; gap: 11px; margin-top: clamp(4px, 1.2vh, 14px); }
+  .bar { display: flex; gap: 2px; height: clamp(46px, 6.8vh, 82px); }
+  .bar > span { display: flex; align-items: center; justify-content: center; min-width: 2px; overflow: hidden;
+    color: #fff; font-weight: 700; font-size: clamp(14px, 1.5vw, 22px); }
+  .bar > span:first-child { border-radius: 8px 0 0 8px; }
+  .bar > span:last-child { border-radius: 0 8px 8px 0; }
+  .keys { display: flex; flex-wrap: wrap; gap: 5px clamp(13px, 1.9vw, 30px); }
+  .key { display: flex; align-items: center; gap: 8px; font-size: clamp(14px, 1.45vw, 21px); }
+  .key i { width: 14px; height: 14px; border-radius: 4px; flex: none; }
+  .axis { display: flex; justify-content: space-between; font-size: clamp(12px, 1.2vw, 17px); color: var(--muted); border-top: 1px solid var(--line); padding-top: 4px; }
+
+  .ab { display: flex; flex-direction: column; gap: clamp(9px, 1.5vh, 18px); margin-top: clamp(4px, 1.2vh, 14px); }
+  .ab-row { display: flex; align-items: center; gap: 15px; }
+  .ab-name { flex: none; width: clamp(120px, 13vw, 200px); font-family: 'Courier New', monospace; font-size: clamp(13px, 1.3vw, 19px); text-align: right; }
+  .ab-track { flex: 1; }
+  .ab-bar { height: clamp(30px, 4.2vh, 52px); border-radius: 0 8px 8px 0; display: flex; align-items: center; justify-content: flex-end; padding-right: 13px; color: #fff; font-weight: 700; font-size: clamp(15px, 1.6vw, 24px); }
+
+  .stats { display: flex; gap: clamp(14px, 2.6vw, 48px); flex-wrap: wrap; }
+  .stat b { font-family: 'Courier New', monospace; font-size: clamp(18px, 1.9vw, 28px); }
+  .stat span { color: var(--muted); font-size: clamp(13px, 1.25vw, 18px); display: block; }
+
+  .labtag { font-size: clamp(13px, 1.25vw, 18px); color: var(--terra); border-top: 2px solid var(--terra); padding-top: 6px; margin: 0; }
+  .labtag code { background: #EFE4D4; }
+
+  .ia-gravidade-alta { color: var(--terra); font-weight: 700; }
+
+  .hud { position: fixed; right: 14px; bottom: 12px; z-index: 6; display: flex; gap: 7px; align-items: center; }
+  .hud button { font: 700 14px 'Public Sans', Arial, sans-serif; background: rgba(30,43,35,.92); color: #F7F4EE; border: 1px solid #5B6B60; border-radius: 7px; padding: 7px 11px; cursor: pointer; }
+  .hud button:hover, .hud button:focus-visible { outline: 2px solid var(--terra-soft); outline-offset: 2px; }
+  #num { font-size: 14px; color: #F7F4EE; background: rgba(30,43,35,.92); padding: 7px 11px; border-radius: 7px; min-width: 62px; text-align: center; }
+
+  .notes { position: fixed; left: 14px; right: 14px; bottom: 56px; z-index: 6; max-height: 32vh; overflow-y: auto;
+    background: #FFFDF8; color: var(--ink); border: 1px solid var(--line); border-radius: 12px; padding: 16px 20px; box-shadow: 0 8px 24px rgba(0,0,0,.25); }
+  .notes[hidden] { display: none; }
+  .notes p { font-size: 19px; line-height: 1.5; }
+  aside { display: none; }
+
+  @media (max-width: 880px) {
+    .row, .center { flex-direction: column; }
+    .slide { padding: 24px 16px 78px; }
+    .defs { grid-template-columns: 1fr; gap: 2px; }
+    .ab-row { flex-direction: column; align-items: stretch; }
+    .ab-name { width: auto; text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<main class="deck" id="deck">
+
+  <!-- 1 -->
+  <section class="slide dark" data-title="Capa">
+    <h1>Três ferramentas<br>para uma IA usar um site</h1>
+    <p class="lead" style="color:var(--soft)">O que cada uma é, o que cada uma devolve e <b>quando uma não serve no lugar da outra</b>.</p>
+    <p class="lead"><span class="green-t">Playwright MCP</span> &nbsp;·&nbsp; <span class="slate-t">Chrome DevTools MCP</span> &nbsp;·&nbsp; <span class="terra-t">Agent Browser</span></p>
+    <aside>Abertura. Diga o contrato: ninguém precisa conhecer nenhuma das três para acompanhar. No fim da aula a plateia tem que conseguir responder "para esta tarefa eu uso qual?". Setas navegam, N abre as notas, F tela cheia.</aside>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide" data-title="A IA não enxerga a tela">
+    <h2>Antes das ferramentas: a IA não enxerga a tela.</h2>
+    <div class="row eq" style="align-items:stretch">
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <p class="cap slate-t">O que você vê</p>
+        <div class="shot" style="--sh:40vh;--x:452;--y:116;--cw:536;--ch:606">
+          <img src="img/cadastro-real.png" alt="Formulário de cadastro da Loja Terra">
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px;justify-content:center">
+        <p class="cap green-t">O que ela recebe</p>
+        <div class="out">
+          <p class="lbl">Saída real · a mesma página, lida por uma ferramenta</p>
+          <pre>- heading "Cadastro" [level=1]  [ref=e7]
+- textbox "Nome completo"       [ref=e12]
+- textbox "E-mail"              [ref=e15]
+- textbox "Telefone"            [ref=e18]
+- combobox "Estado"             [ref=e21]
+- checkbox "Aceito os termos"   [ref=e24]
+- button  "Enviar"              [ref=e26]</pre>
+        </div>
+      </div>
+    </div>
+    <p class="lead">Cada item da lista tem um <em class="k">nome</em> e uma <em class="k">ref</em>, um código curto que aponta para ele.</p>
+    <ul class="lista">
+      <li><b>Sem nome:</b> o campo vira "campo 1" e a IA não sabe o que escrever.</li>
+      <li><b>Ref muda:</b> a página recarregou, e clicar com a ref antiga age no lugar errado.</li>
+      <li><b>Age cedo demais:</b> a lista está incompleta, e a IA clica no que existe naquele instante.</li>
+      <li><b>Sessão errada:</b> a lista é de outra conta. O nome só parece estranho se alguém conferir.</li>
+    </ul>
+    <p class="muted">As três ferramentas da aula leem essa mesma lista. A diferença está no que cada uma faz depois.</p>
+    <aside>Este slide é a base comum: sem ele, nada do resto faz sentido. Pergunte: se o campo se chamasse "campo 1", a IA saberia o que escrever? O nome do elemento é a única pista que ela tem. Diga que a ref muda a cada leitura — isso volta no slide do erro. Os quatro problemas da lista são o roteiro da aula: cada um aparece num cenário ou no slide do erro.</aside>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide" data-title="MCP x linha de comando">
+    <p class="eyebrow">A primeira diferença</p>
+    <h2>Duas formas de a IA alcançar o navegador.</h2>
+    <div class="row eq">
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <p class="lead"><b class="green-t">1. Servidor MCP.</b> Um programa que se anuncia para a IA com uma lista de ações. A IA escolhe e chama sozinha. Você só precisa registrar e aprovar.</p>
+        <div class="out">
+          <p class="lbl">Saída real · claude mcp list · 05/11/2026</p>
+          <pre>playwright: npx @playwright/mcp@latest
+  ⏸ Pending approval
+chrome-devtools: npx -y chrome-devtools-mcp@latest
+  ⏸ Pending approval</pre>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <p class="lead"><b class="terra-t">2. Programa de linha de comando.</b> Você digita, um script digita, ou a IA digita no terminal se você pedir. Nada fica registrado no Claude Code: a ação só acontece quando alguém roda o comando.</p>
+        <div class="cmd"><pre>$ agent-browser open localhost:3000/login/
+$ agent-browser snapshot -i</pre></div>
+        <p class="muted">É a diferença entre <b>oferecer</b> a ação à IA e <b>executar</b> a ação você mesmo. O Agent Browser faz as duas coisas; os dois slides seguintes mostram como cada uma chega ao navegador.</p>
+      </div>
+    </div>
+    <p class="muted">MCP é só o combinado de como a IA pede e o programa responde. Os servidores do projeto ficam declarados em <code>.mcp.json</code>; o Claude Code pede aprovação ao abrir a pasta.</p>
+    <aside>Para quem nunca viu MCP: compare com instalar um aplicativo que passa a aparecer no menu, contra abrir o terminal e digitar. Mostre o .mcp.json do projeto. "Pending approval" quer dizer que ninguém aprovou ainda; vira "Connected" depois. Essa é a diferença mais importante do dia e vale repetir.</aside>
+  </section>
+
+  <!-- MCP por dentro -->
+  <section class="slide" data-title="Como o MCP chega ao navegador">
+    <p class="eyebrow" style="color:var(--green)">Por dentro · servidor MCP</p>
+    <h2 class="green-t">O servidor MCP fica entre a IA e o navegador.</h2>
+    <div class="row eq">
+      <ul class="lista">
+        <li><b>Sobe sozinho:</b> o Claude Code lê o <code>.mcp.json</code> e inicia <code>npx @playwright/mcp@latest</code>.</li>
+        <li><b>Anuncia o que sabe:</b> devolve 25 ferramentas, como <code>browser_navigate</code> e <code>browser_snapshot</code>.</li>
+        <li><b>Executa:</b> cada pedido vira uma ação no navegador, e a resposta volta com o texto da página.</li>
+      </ul>
+      <div>
+        <div class="out"><p class="lbl">Saída real · troca com @playwright/mcp · 05/11/2026</p><pre>→ {"jsonrpc":"2.0","id":3,"method":"tools/call",
+   "params":{"name":"browser_navigate",
+   "arguments":{"url":"http://localhost:3000/cadastro/"}}}
+
+← {"content":[{"type":"text","text":
+   "### Ran Playwright code
+   await page.goto('http://localhost:3000/cadastro/');
+   ### Page
+   - Page URL: http://localhost:3000/cadastro/
+   - Page Title: Cadastro - Loja Terra …</pre></div>
+        <p class="muted">Trecho real, com linhas quebradas para caber.</p>
+      </div>
+    </div>
+    <p class="nao">A IA não fala com o navegador: ela manda um pedido ao servidor, e é o servidor que fala com o navegador.</p>
+    <aside>A conversa passa pelo stdin e pelo stdout, com uma mensagem JSON por linha. Mostre o "Ran Playwright code": é o código que o servidor escreveu para cumprir o pedido. A IA não escreve Playwright; ela escolhe a ferramenta e os argumentos.</aside>
+  </section>
+
+  <!-- Agent Browser por dentro -->
+  <section class="slide" data-title="Como o Agent Browser chega ao navegador">
+    <p class="eyebrow" style="color:var(--terra)">Por dentro · programa de linha de comando</p>
+    <h2 class="terra-t">Cada comando fala com um processo que segura o Chrome.</h2>
+    <div class="row eq">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <p><b>1. O comando é curto.</b> <code>agent-browser open</code> entrega a ordem a um processo em segundo plano, o daemon. Ele abre o Chrome e o mantém aberto de um comando para o outro.</p>
+        <p><b>2. A sessão é um navegador separado.</b> <code>AGENT_BROWSER_SESSION</code> ou <code>--session</code> cria um navegador com cookies e abas próprios. Duas sessões, dois logins.</p>
+        <p><b>3. O mesmo programa também fala MCP.</b> <code>agent-browser mcp</code> expõe 29 ferramentas, com o prefixo <code>agent_browser_</code>, pelo mesmo stdin e stdout do Playwright MCP.</p>
+      </div>
+      <div>
+        <div class="cmd"><pre>$ agent-browser open http://localhost:3000/cadastro/
+[agent-browser] launched browser
+✓ Cadastro - Loja Terra
+  http://localhost:3000/cadastro/
+$ agent-browser snapshot -i
+- link "Loja Terra" [ref=e1]
+- link "Entrar" [ref=e2]
+- heading "Cadastro" [level=1, ref=e3]
+- textbox "Nome completo" [ref=e4]
+- textbox "E-mail" [ref=e5]
+- textbox "Telefone" [ref=e6]</pre></div>
+        <p class="muted">Saída real, executada em 05/11/2026 com o Agent Browser 0.41.0.</p>
+      </div>
+    </div>
+    <p class="nao">O navegador não some quando o comando termina. Se ninguém fechar, o daemon fecha o Chrome sozinho depois de uma hora sem uso; <code>agent-browser close</code> fecha antes.</p>
+    <aside>Pergunte quem fecha o navegador se a pessoa esquecer. A resposta é o daemon, em uma hora. Mas o correto é fechar com close. Sem sessão nomeada, o navegador é o padrão, que a documentação do próprio programa diz ser compartilhado com outros agentes da máquina.</aside>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide" data-title="Onde fica instalado">
+    <p class="eyebrow">Ainda sobre registrar</p>
+    <h2>Onde a ferramenta fica instalada.</h2>
+    <table>
+      <thead><tr><th style="width:26%">Alcance</th><th>Claude Code</th><th>Devin</th></tr></thead>
+      <tbody>
+        <tr><th>Só esta pasta <span class="muted">(padrão)</span></th><td><code>claude mcp add</code></td><td><code>devin mcp add</code></td></tr>
+        <tr><th class="destaque">A máquina toda<br><span class="muted">todos os seus projetos</span></th><td class="destaque"><code>claude mcp add -s user</code></td><td class="destaque"><code>devin mcp add -s user</code></td></tr>
+        <tr><th>O time <span class="muted">(versionado)</span></th><td><code>claude mcp add -s project</code><br><span class="muted">grava em <code>.mcp.json</code></span></td><td><code>devin mcp add -s project</code><br><span class="muted">grava em <code>.devin/mcp_config.json</code></span></td></tr>
+      </tbody>
+    </table>
+    <div class="row eq">
+      <div class="cmd"><pre># instalar na máquina toda · Claude Code
+claude mcp add -s user playwright \
+  npx @playwright/mcp@latest</pre></div>
+      <div class="cmd"><pre># instalar na máquina toda · Devin
+devin mcp add -s user playwright \
+  -- npx @playwright/mcp@latest</pre></div>
+    </div>
+    <p class="muted">O Devin também aceita pela web, em <b>Customize &rarr; MCPs &rarr; Add MCP &rarr; Add custom MCP</b>, e guarda o registro global em <code>~/.config/devin/mcp_config.json</code>. Repare no <code>--</code> antes do comando: é exigência do Devin, o Claude Code não pede.</p>
+    <p class="nao"><b>O Agent Browser tem dois modos.</b> Como comando, <code>npm install -g agent-browser</code> já instala na máquina toda e não pede registro. Como servidor MCP, é o mesmo programa com <code>agent-browser mcp</code>, configurado no cliente.</p>
+    <aside>Esta é a dúvida número um de quem instala pela primeira vez: "instalei e sumiu". Quase sempre a pessoa instalou no escopo da pasta e abriu outra. Mostre que MCP é protocolo: o mesmo servidor serve a qualquer cliente, só muda o comando de registro. No Devin, o -- separa os argumentos do servidor dos argumentos do devin. Quem preferir editar o arquivo à mão, o formato do Devin é o mesmo em ~/.config/devin/mcp_config.json (global) e em .devin/mcp_config.json (time): { "mcpServers": { "playwright": { "command": "npx", "args": ["@playwright/mcp@latest"] } } }. Para chaves pessoais que não devem ir para o git, o Devin usa .devin/mcp_config.local.json.</aside>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide" data-title="As três lado a lado">
+    <h2>As três, lado a lado.</h2>
+    <table>
+      <thead>
+        <tr><th></th><th class="t-pw">Playwright MCP</th><th class="t-dt">Chrome DevTools MCP</th><th class="t-ab">Agent Browser</th></tr>
+      </thead>
+      <tbody>
+        <tr><th>O que é</th><td>servidor MCP</td><td>servidor MCP</td><td>programa de linha de comando e servidor MCP (<code>agent-browser mcp</code>)</td></tr>
+        <tr><th>Quem dá a ordem</th><td>a IA</td><td>a IA</td><td>você, um script, ou a IA</td></tr>
+        <tr><th>Abre, lê e age na página</th><td class="sim">sim</td><td class="sim">sim</td><td class="sim">sim</td></tr>
+        <tr><th>Limita rede e CPU para medir</th><td>não</td><td class="destaque">sim</td><td>não</td></tr>
+        <tr><th>Grava trace e aponta a causa da lentidão</th><td>não</td><td class="destaque">sim</td><td>não</td></tr>
+        <tr><th>Dá os números das Core Web Vitals</th><td>não</td><td>sim</td><td>sim</td></tr>
+        <tr><th>Sessões nomeadas, um login em cada</th><td>não</td><td>não</td><td class="destaque">sim</td></tr>
+        <tr><th>Navegadores</th><td>Chromium, Firefox, WebKit</td><td>Chrome</td><td>Chrome</td></tr>
+      </tbody>
+    </table>
+    <p class="lead">As três abrem a página e clicam. <b>A diferença está nas três linhas destacadas.</b></p>
+    <aside>Dê tempo para lerem. Depois cubra a tabela e pergunte: qual delas eu uso para saber por que a página está lenta? E para testar com dois logins? Quem errar volta aqui. Os próximos slides mostram cada linha funcionando de verdade.</aside>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide" data-title="Playwright MCP">
+    <p class="eyebrow" style="color:var(--green)">Ferramenta 1 de 3</p>
+    <h2 class="green-t">Playwright MCP</h2>
+    <p class="lead">Serve para <b>agir na página com segurança</b>: ler a lista de elementos, clicar, preencher e guardar a prova em imagem.</p>
+    <div class="row eq">
+      <div style="display:flex;flex-direction:column;gap:11px">
+        <p class="eyebrow" style="color:var(--green)">Instalar · Node 18 ou superior</p>
+        <div class="cmd"><pre># só nesta pasta
+claude mcp add playwright npx @playwright/mcp@latest
+# na máquina toda
+claude mcp add -s user playwright npx @playwright/mcp@latest</pre></div>
+        <p class="eyebrow" style="color:var(--green)">Usar · você escreve em português</p>
+        <div class="cmd"><pre>Abra /cadastro/ com o Playwright MCP,
+liste os campos e tire uma captura
+da página inteira.</pre></div>
+      </div>
+      <div>
+        <p class="eyebrow" style="color:var(--green)">O que a IA chama por baixo</p>
+        <dl class="defs">
+          <dt>browser_navigate</dt><dd>abre o endereço</dd>
+          <dt>browser_snapshot</dt><dd>lê a página e devolve as refs</dd>
+          <dt>browser_click</dt><dd>clica por ref</dd>
+          <dt>browser_fill_form</dt><dd>preenche vários campos de uma vez</dd>
+          <dt>browser_wait_for</dt><dd>espera um texto aparecer</dd>
+          <dt>browser_take_screenshot</dt><dd>guarda a prova</dd>
+        </dl>
+      </div>
+    </div>
+    <p class="nao"><b>Não mede desempenho.</b> Não grava trace, não calcula LCP e não limita rede nem CPU. Para descobrir por que a página demora, ele não serve.</p>
+    <aside>Deixe claro que ninguém decora esses nomes: você escreve o pedido e a IA escolhe a chamada. A lista está aí só para a plateia reconhecer o que vê acontecer na tela do Claude Code. A linha vermelha é o que separa esta ferramenta da próxima.</aside>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide" data-title="O que ele devolve">
+    <p class="eyebrow" style="color:var(--green)">Playwright MCP · na prática</p>
+    <h2>Ela procura “Criar conta”. A página diz “Enviar”.</h2>
+    <div class="center" style="--sh:46vh;--x:445;--y:108;--cw:550;--ch:742">
+      <div>
+        <p class="cap green-t">O design</p>
+        <div class="shot"><img src="img/design-vazio.png" alt="Design: título Criar conta, campos com marcadores, botão Criar conta"></div>
+      </div>
+      <div>
+        <p class="cap slate-t">A página entregue</p>
+        <div class="shot"><img src="img/cadastro-real.png" alt="Página real: título Cadastro, campos sem marcadores, botão Enviar"></div>
+      </div>
+    </div>
+    <p class="lead">A captura da direita saiu do <code>browser_take_screenshot</code>. Comparada com o design, dá <b>13 diferenças</b> — e o botão que a IA procurava não existe.</p>
+    <p class="labtag">No laboratório · cenário 1 · <code>design/</code> contra <code>public/cadastro/</code> · lista completa em <code>gabarito/diferencas-cadastro.md</code></p>
+    </div>
+    <aside>Não liste as diferenças: dê 40 segundos e peça três em voz alta. Vão achar o título e o botão. Depois aponte os marcadores sumidos, o texto de ajuda do e-mail e o rodapé "Já tem conta?". É isto que a ferramenta entrega: a tela de verdade, para você comparar.</aside>
+  </section>
+
+  <!-- demo -->
+  <section class="slide" data-title="Demonstração: cole no Claude Code">
+    <p class="eyebrow" style="color:var(--green)">Playwright MCP · demonstração ao vivo</p>
+    <h2 class="green-t">Cole isto no Claude Code e assista</h2>
+    <div class="cmd"><pre>Use o Playwright MCP para comparar a página de cadastro com o design do laboratório.
+
+1. Abra http://localhost:3000/cadastro/ e espere a página carregar.
+2. Tire uma captura da página inteira e salve em capturas/ia-cadastro.png.
+3. Abra a imagem de referência design/cadastro-vazio.png.
+4. Compare as duas imagens e liste cada diferença visível: elemento, o que o design mostra, o que a página mostra e gravidade (Alta, Média ou Baixa).
+
+Não abra gabarito/ nem public/: use só o navegador e a imagem de design/. Não invente diferenças. Responda com uma tabela.</pre></div>
+    <p class="muted">Antes: <code>node server.js</code> nesta pasta, e o Claude Code aberto aqui. Quando o Playwright MCP pedir aprovação, aprove na tela: é o "Pending approval" do slide 3.</p>
+    <aside>Deixe a plateia ler o prompt antes de colar: é só texto em português, sem comando. Depois mostre a sequência que aparece na tela: navegar, capturar, abrir o design e responder em tabela. Leva de 1 a 3 minutos; enquanto roda, pergunte o que eles acham que a IA vai achar. Se a página não abrir, o servidor não está no ar. A lista para conferir depois está em gabarito/diferencas-cadastro.md; só abra depois da tentativa.</aside>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide" data-title="Chrome DevTools MCP">
+    <p class="eyebrow" style="color:var(--slate)">Ferramenta 2 de 3</p>
+    <h2 class="slate-t">Chrome DevTools MCP</h2>
+    <p class="lead">Serve para <b>medir e explicar</b>: grava o carregamento, diz onde o tempo foi e simula a rede e o aparelho do usuário.</p>
+    <div class="row eq">
+      <div style="display:flex;flex-direction:column;gap:11px">
+        <p class="eyebrow" style="color:var(--slate)">Instalar · Node 18 e o Chrome</p>
+        <div class="cmd"><pre># só nesta pasta
+claude mcp add chrome-devtools npx chrome-devtools-mcp@latest
+# na máquina toda
+claude mcp add -s user chrome-devtools npx chrome-devtools-mcp@latest</pre></div>
+        <p class="eyebrow" style="color:var(--slate)">Usar</p>
+        <div class="cmd"><pre>Emule Slow 4G e CPU 4x, meça /lenta/
+com recarga e diga os 3 maiores
+culpados pelo LCP.</pre></div>
+      </div>
+      <div>
+        <p class="eyebrow" style="color:var(--slate)">O que a IA chama por baixo</p>
+        <dl class="defs">
+          <dt>emulate</dt><dd>limita rede e CPU</dd>
+          <dt>performance_start_trace</dt><dd>grava o carregamento</dd>
+          <dt>performance_analyze_insight</dt><dd>explica a causa</dd>
+          <dt>list_network_requests</dt><dd>tudo que foi baixado</dd>
+          <dt>list_console_messages</dt><dd>os erros da página</dd>
+          <dt>lighthouse_audit</dt><dd>a nota completa</dd>
+        </dl>
+      </div>
+    </div>
+    <p class="nao"><b>Emular primeiro, medir depois.</b> Esta é a ordem, e é o erro mais caro do dia quando se inverte — como o slide "Duas medições" mostra.</p>
+    <aside>Ele também clica e preenche, igual ao Playwright MCP: não venda como se fosse só medidor. O que só ele tem é a limitação de rede e CPU e o trace com diagnóstico. Guarde o suspense da ordem emular/medir para o slide "Duas medições".</aside>
+  </section>
+
+  <!-- 8 -->
+  <section class="slide" data-title="Duas medições">
+    <h2>A mesma página, medida duas vezes.</h2>
+    <div class="row eq">
+      <div class="out">
+        <p class="lbl">Saída real · agent-browser vitals · sem limitação</p>
+        <pre>url: http://localhost:3000/lenta/
+ttfb: 1.7ms  fcp: 768ms
+<b>lcp: 768ms</b>   cls: 0</pre>
+      </div>
+      <div class="out ruim">
+        <p class="lbl">Saída real · Chrome DevTools MCP · Slow 4G + CPU 4x</p>
+        <pre>url: http://localhost:3000/lenta/
+<b>LCP: 20 040 ms</b>   CLS: 0,06
+cache ignorado, com recarga</pre>
+      </div>
+    </div>
+    <p class="lead">Mesma página, mesma máquina, mesmo minuto: <b>768 ms</b> contra <b>20 segundos</b>.</p>
+    <p class="muted">A diferença não foi a ferramenta. Foi a <b>condição</b>. No computador de quem desenvolve a página parece ótima; na rede de quem usa, não.</p>
+    <aside>Este é o slide mais importante da parte de desempenho. Pergunte qual dos dois números vocês mostrariam ao chefe — e qual deles o usuário sente. Deixe claro que medir sem limitar rede e CPU é medir a sua máquina, não o problema.</aside>
+  </section>
+
+  <!-- 9 -->
+  <section class="slide" data-title="Sem uma palavra">
+    <h2>E é assim que o usuário vê, 1,3 segundo depois.</h2>
+    <img class="shot-full" style="--sh:52vh" src="img/lenta-esperando.png" alt="A página de produtos carregando em rede lenta: as imagens aparecem, mas nenhum texto está visível na tela">
+    <p class="lead">O texto está todo na página. A fonte ainda não chegou — e foi pedida com <code>font-display: block</code>, que manda o navegador esconder o texto até lá.</p>
+    <p class="muted">Captura real de <code>/lenta/</code> em Slow 4G e CPU 4x. Nem o nome da loja aparece. Sem limitação, essa tela nunca acontece no computador de quem desenvolve.</p>
+    <aside>Esta é a tradução humana dos 20 segundos. Pergunte o que o usuário faz nesse segundo e meio: volta. É o argumento de por que medir na condição certa não é preciosismo.</aside>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide" data-title="Onde foram os 20 s">
+    <h2>E ele diz onde os 20 segundos foram.</h2>
+    <div class="chart">
+      <div class="bar" role="img" aria-label="Repartição do LCP de 20,04 segundos: resposta do servidor 5,68 s, atraso até pedir a imagem 5,01 s, download da imagem 9,31 s, desenho 0,05 s">
+        <span style="background:var(--c1);width:28.3%" title="Resposta do servidor — 5,68 s">5,68 s</span>
+        <span style="background:var(--c2);width:25.0%" title="Atraso até pedir a imagem — 5,01 s">5,01 s</span>
+        <span style="background:var(--c3);width:46.4%" title="Baixar a imagem do topo — 9,31 s">9,31 s</span>
+        <span style="background:var(--c4);width:0.3%" title="Desenhar — 0,05 s"></span>
+      </div>
+      <div class="axis"><span>0 s</span><span>LCP · 20,04 s</span></div>
+      <div class="keys">
+        <span class="key"><i style="background:var(--c1)"></i>Resposta do servidor</span>
+        <span class="key"><i style="background:var(--c2)"></i>Atraso até pedir a imagem</span>
+        <span class="key"><i style="background:var(--c3)"></i>Baixar a imagem do topo</span>
+        <span class="key"><i style="background:var(--c4)"></i>Desenhar <b>0,05 s</b></span>
+      </div>
+    </div>
+    <p class="lead">Desenhar levou <b>0,05 s</b>. <b>O resto foi espera</b>, e é isso que o <code>vitals</code> sozinho não mostra.</p>
+    <p class="muted">A imagem do topo tem 2400&times;900 e pesa 345 KB, mas é exibida num espaço de 1440.</p>
+    <p class="muted">Medido com <code>performance_start_trace</code>, em 05/11/2026.</p>
+    <aside>Pergunte antes de mostrar os rótulos: onde vocês apostam que o tempo foi? Quase todos chutam o HTML, que responde em 2 milissegundos. A faixa azul é o navegador desenhando: quase nada. Este é o argumento de por que a ferramenta de medição não é a mesma que a de agir.</aside>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide" data-title="Antes e depois">
+    <h2>Com o diagnóstico, o conserto.</h2>
+    <div class="ab">
+      <div class="ab-row">
+        <span class="ab-name">/lenta/</span>
+        <span class="ab-track"><span class="ab-bar" style="background:var(--c1);width:100%">20,04 s</span></span>
+      </div>
+      <div class="ab-row">
+        <span class="ab-name">/lenta-gabarito/</span>
+        <span class="ab-track"><span class="ab-bar" style="background:var(--c3);width:12.5%">2,50 s</span></span>
+      </div>
+      <p class="muted">LCP nas mesmas condições: Slow 4G, CPU 4x, cache ignorado.</p>
+    </div>
+    <div class="stats">
+      <span class="stat"><b>21 &rarr; 9</b><span>requisições</span></span>
+      <span class="stat"><b>3,5 MB &rarr; 64 KB</b><span>imagens</span></span>
+      <span class="stat"><b>2 &rarr; 1</b><span>chamadas à API</span></span>
+      <span class="stat"><b>2 &rarr; 0</b><span>erros no console</span></span>
+      <span class="stat"><b>0,06 &rarr; 0</b><span>CLS</span></span>
+    </div>
+    <ul class="lista">
+      <li>Imagens no tamanho certo.</li>
+      <li>Uma chamada à API, em vez de duas.</li>
+      <li>Nada bloqueando a renderização.</li>
+    </ul>
+    <p class="lead"><b>Oito vezes mais rápido, sem reescrever o site.</b></p>
+    <p class="labtag">No laboratório · cenário 2 · conserte <code>public/lenta/</code> e meça de novo · o “depois” pronto está em <code>/lenta-gabarito/</code></p>
+    <aside>As duas versões rodam ao mesmo tempo no projeto, então dá para medir as duas na frente da turma. Quem terminar cedo responde: por que o gabarito carrega só quatro produtos de cada vez?</aside>
+  </section>
+
+  <!-- 15 -->
+  <section class="slide" data-title="O que muda no código">
+    <h2>O que isso muda no seu código.</h2>
+    <div class="cmd"><pre><span class="x">✗</span>  &lt;label&gt;Telefone&lt;/label&gt;                        o nome vem do marcador
+<span class="v">✓</span>  &lt;label for="telefone"&gt;Telefone&lt;/label&gt;         o nome vem do rótulo
+
+<span class="x">✗</span>  &lt;div onclick="enviar()"&gt;Enviar&lt;/div&gt;           não é botão para ninguém
+<span class="v">✓</span>  &lt;button type="submit"&gt;Enviar&lt;/button&gt;          é botão para todo mundo
+
+<span class="x">✗</span>  &lt;img src="hero.jpg"&gt;                           2400 px · 345 KB
+<span class="v">✓</span>  &lt;img src="hero-1440.webp" width="1440"         1440 px ·  10 KB
+        height="540" fetchpriority="high"&gt;</pre></div>
+    <p class="lead">O que um leitor de tela precisa é exatamente o que a IA precisa. <b>É a mesma base.</b></p>
+    <p class="muted">A primeira linha é um defeito real de <code>public/cadastro/</code>. E repare: <code>agent-browser a11y</code> passa nessa página com <b>0 violações</b> — auditoria automática não enxerga tudo, e ferramenta nenhuma substitui olhar.</p>
+    <aside>Este é o slide que justifica a aula para quem escreve o front: não é trabalho extra para agradar robôs, é acessibilidade, que já era obrigação. A IA só tornou o custo visível, porque falha alto e na hora. O detalhe do axe-core com 0 violações é ótimo para fechar: automação ajuda, não decide.</aside>
+  </section>
+
+
+  <!-- 11 -->
+  <section class="slide" data-title="Agent Browser">
+    <p class="eyebrow">Ferramenta 3 de 3</p>
+    <h2 class="terra-t">Agent Browser</h2>
+    <p class="lead">Serve para <b>rodar o fluxo pelo terminal</b>, com uma <b>sessão nomeada por login</b> — e cada sessão guarda os próprios cookies.</p>
+    <div class="row eq">
+      <div style="display:flex;flex-direction:column;gap:11px">
+        <p class="eyebrow">Instalar · o <code>-g</code> já instala na máquina toda</p>
+        <div class="cmd"><pre>npm install -g agent-browser
+agent-browser install</pre></div>
+        <p class="eyebrow">Usar · você digita, ou um script digita</p>
+        <div class="cmd"><pre>ab="agent-browser --session a"
+$ab open localhost:3000/login/
+$ab snapshot -i
+$ab fill @e4 "ana@exemplo.com"
+$ab click @e6</pre></div>
+      </div>
+      <div>
+        <p class="eyebrow">Comandos que vamos usar</p>
+        <dl class="defs">
+          <dt>--session &lt;nome&gt;</dt><dd>abre ou retoma uma sessão isolada</dd>
+          <dt>open</dt><dd>vai para o endereço</dd>
+          <dt>snapshot -i</dt><dd>lê a página e devolve as refs</dd>
+          <dt>fill / click</dt><dd>preenche e clica por ref</dd>
+          <dt>vitals</dt><dd>os números das Web Vitals</dd>
+          <dt>a11y</dt><dd>auditoria de acessibilidade</dd>
+          <dt>session list</dt><dd>mostra o que está aberto</dd>
+        </dl>
+      </div>
+    </div>
+    <p class="nao"><b>Também é servidor MCP.</b> Com <code>agent-browser mcp</code>, a IA encontra as ferramentas sozinha, como no Playwright MCP. Como comando, serve igual a você, a um script de CI e à IA, sem cliente nenhum.</p>
+    <aside>Repare que ele também mede (vitals) e audita acessibilidade (a11y). O que é só dele é a sessão nomeada que sobrevive entre comandos. Os comandos mudam entre versões: confira sempre com --help antes da aula.</aside>
+  </section>
+
+  <!-- 12 -->
+  <section class="slide" data-title="Duas sessões">
+    <p class="eyebrow">Agent Browser · na prática</p>
+    <h2>Dois logins ao mesmo tempo, sem logout no meio.</h2>
+    <div class="center" style="--sh:38vh;--x:75;--y:100;--cw:700;--ch:390">
+      <div>
+        <p class="cap terra-t">--session a</p>
+        <div class="shot p"><img src="img/painel-ana.png" alt="Painel da Ana, com a lista de tarefas dela"></div>
+      </div>
+      <div>
+        <p class="cap terra-t">--session b</p>
+        <div class="shot p"><img src="img/painel-bruno.png" alt="Painel do Bruno, com uma lista de tarefas diferente"></div>
+      </div>
+    </div>
+    <p class="lead">Dois cookies, duas listas de tarefas, um navegador só. <b>Capturadas no mesmo minuto.</b></p>
+    <p class="labtag">No laboratório · cenário 3 · <code>public/login/</code> e <code>/painel</code> · contas <code>ana@exemplo.com</code> e <code>bruno@exemplo.com</code>, senha <code>teste123</code></p>
+    <aside>Pergunte como fariam isso à mão: janela anônima, outro navegador, logout e login de novo. Uma palavra na linha de comando resolve. Feche tudo no fim com close --all, senão as sessões ficam abertas.</aside>
+  </section>
+
+  <!-- 13 -->
+  <section class="slide" data-title="O erro das três">
+    <h2>O mesmo erro, nas três ferramentas.</h2>
+    <div class="row eq">
+      <div class="out ruim">
+        <p class="lbl">Saída real · agindo sem ler a página</p>
+        <pre>$ fill @e4 "bruno@exemplo.com"
+<span class="x">✗</span> Unknown ref: e4
+<span class="x">✗</span> Unknown ref: e5
+<span class="x">✗</span> Unknown ref: e6
+<span class="x">✗</span> Wait timed out after 25000ms</pre>
+      </div>
+      <div class="out">
+        <p class="lbl">Saída real · lendo antes de agir</p>
+        <pre>$ snapshot -i
+- textbox "E-mail" [ref=e4]
+<span class="v">✓</span> Done
+<span class="v">✓</span> Done
+<span class="v">✓</span> Done  →  /painel  "Olá, Bruno"</pre>
+      </div>
+    </div>
+    <p class="lead"><em class="k">Ler</em> &rarr; <em class="k">agir</em> &rarr; <em class="k">conferir</em></p>
+    <ul class="lista">
+      <li>Uma ref vale para <b>uma leitura, numa sessão</b>.</li>
+      <li>Depois do login, a mesma página devolveu <code>e7</code>, <code>e8</code>, <code>e9</code>.</li>
+      <li>Esse erro aconteceu ao montar esta aula. Vale para as três, porque todas trabalham por ref.</li>
+    </ul>
+    <aside>Conte que o erro é seu, sem drama: você pulou o snapshot na sessão nova. É o erro que a turma vai cometer no laboratório, nas três ferramentas, e a correção é sempre a mesma linha. Pergunte por que o wait também falhou: porque o login nunca aconteceu.</aside>
+  </section>
+
+  <!-- WebMCP -->
+  <section class="slide" data-title="WebMCP: a página declara as ações">
+    <p class="eyebrow" style="color:var(--muted)">Uma quarta ideia · experimental</p>
+    <h2>E se a própria página dissesse o que a IA pode fazer?</h2>
+    <p class="lead">Hoje a IA adivinha as ações lendo a tela. Com WebMCP, a página declara as ações e a IA chama direto.</p>
+    <div class="row eq">
+      <ul class="lista">
+        <li><b>Hoje:</b> a IA lê a lista de elementos e tenta descobrir o que cada botão faz.</li>
+        <li><b>Com WebMCP:</b> a página registra cada ação com nome e descrição.</li>
+        <li><b>Estado:</b> experimental. Teste de origem no Chrome 149, e uma flag para desenvolvimento local.</li>
+      </ul>
+      <div>
+        <p class="muted">Para testar localmente: <code>chrome://flags/#enable-webmcp-testing</code>, em Ativada, e reinicie o Chrome.</p>
+      </div>
+    </div>
+    <p class="nao"><b>Fica fora do roteiro.</b> É para acompanhar, não para usar nesta aula.</p>
+    <aside>Ligue ao slide 2: a IA não vê a tela, então precisa adivinhar. Com WebMCP, a página conta o que pode fazer. Mostre o comando e a resposta vazia. A flag não preenche a lista sozinha: uma página precisa registrar ações, então o vazio é esperado. Não prometa nada: é experimental e pode mudar.</aside>
+  </section>
+
+  <!-- 14 -->
+  <section class="slide" data-title="Qual usar">
+    <h2>Qual usar.</h2>
+    <table>
+      <thead><tr><th style="width:56%">Quando a sua pergunta é…</th><th>A ferramenta é</th></tr></thead>
+      <tbody>
+        <tr><td>“A tela entregue bate com o design?”</td><td><b class="t-pw">Playwright MCP</b></td></tr>
+        <tr><td>“Esse formulário envia e confirma mesmo?”</td><td><b class="t-pw">Playwright MCP</b></td></tr>
+        <tr><td>“Por que isso demora tanto para o usuário?”</td><td><b class="t-dt">Chrome DevTools MCP</b></td></tr>
+        <tr><td>“O que exatamente está travando a renderização?”</td><td><b class="t-dt">Chrome DevTools MCP</b></td></tr>
+        <tr><td>“Roda esse fluxo com dois logins diferentes.”</td><td><b class="t-ab">Agent Browser</b></td></tr>
+        <tr><td>“Coloca isso num script que roda sozinho.”</td><td><b class="t-ab">Agent Browser</b></td></tr>
+      </tbody>
+    </table>
+    <p class="lead">Tarefa que mistura as três? A ordem é sempre <b>medir, corrigir, medir de novo</b>.</p>
+    <p class="muted">A quarta ideia, o WebMCP, está no slide anterior.</p>
+    <aside>Faça ao contrário: leia só a coluna da esquerda e deixe a plateia responder. Se errarem, volte à tabela "As três, lado a lado". Sobre o WebMCP, seja honesto: é horizonte, não prática — vale conhecer o nome, não vale apostar.</aside>
+  </section>
+
+  <!-- Fontes -->
+  <section class="slide" data-title="Para ler depois">
+    <p class="eyebrow">Fontes</p>
+    <h2>Para ler depois.</h2>
+    <ul class="lista">
+      <li><b>WebMCP:</b> <code>developer.chrome.com/docs/ai/webmcp?hl=pt-br</code></li>
+      <li><b>Agent Browser:</b> <code>github.com/vercel-labs/agent-browser</code></li>
+      <li><b>Playwright MCP:</b> <code>playwright.dev/docs/getting-started-mcp</code></li>
+    </ul>
+    <aside>Deixe os links na tela. O WebMCP e o Playwright MCP têm documentação oficial; o Agent Browser está no repositório do projeto. Quem quiser testar o WebMCP precisa da flag local descrita no slide do WebMCP.</aside>
+  </section>
+
+  <!-- 16 -->
+  <section class="slide dark" data-title="Agora é você">
+    <h2>Agora é você.</h2>
+    <table style="color:var(--light)">
+      <thead><tr><th style="width:8%"></th><th style="width:34%">Tarefa</th><th>Onde</th></tr></thead>
+      <tbody>
+        <tr><td><b class="green-t">1</b></td><td><b class="green-t">Compare com o design</b><br><span class="muted">Playwright MCP. Quantas das 13 você acha?</span></td><td><code>/cadastro/</code> e <code>design/</code> · salve em <code>capturas/</code></td></tr>
+        <tr><td><b class="slate-t">2</b></td><td><b class="slate-t">Meça a página lenta</b><br><span class="muted">Chrome DevTools MCP. Emule antes de medir.</span></td><td><code>/lenta/</code> · anote em <code>medicoes/</code></td></tr>
+        <tr><td><b class="terra-t">3</b></td><td><b class="terra-t">Rode dois logins</b><br><span class="muted">Agent Browser, uma sessão para cada conta.</span></td><td><code>/login/</code> e <code>/painel</code> · capturas em <code>saidas/</code></td></tr>
+      </tbody>
+    </table>
+    <div class="cmd" style="max-width:560px"><pre>cd laboratorio-agentes
+node server.js</pre></div>
+    <p class="lead terra-t">Ler &rarr; agir &rarr; conferir.</p>
+    <p class="muted">O gabarito só depois de tentar. Executado nesta máquina em 05/11/2026: snapshots e capturas com Playwright MCP, traces com Chrome DevTools MCP, sessões e vitals com Agent Browser 0.41.0.</p>
+    <aside>Divida o tempo: dez minutos no primeiro, quinze no segundo, dez no terceiro. Circule pela sala. Senha das duas contas: teste123. Quem terminar tudo abre /painel numa terceira sessão sem login e vê o redirecionamento.</aside>
+  </section>
+
+</main>
+
+<div class="hud">
+  <button id="prev" type="button" aria-label="Slide anterior">&larr;</button>
+  <span id="num" aria-live="polite"></span>
+  <button id="next" type="button" aria-label="Próximo slide">&rarr;</button>
+  <button id="notesBtn" type="button">Notas (N)</button>
+  <button id="fullBtn" type="button">Tela cheia (F)</button>
+</div>
+<div class="notes" id="notes" hidden></div>
+
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total = slides.length;
+  var current = 0;
+  var notesOn = false;
+
+  var numEl = document.getElementById('num');
+  var notesEl = document.getElementById('notes');
+
+  function show(n) {
+    current = Math.max(0, Math.min(total - 1, n));
+    slides.forEach(function (s, k) { s.classList.toggle('active', k === current); });
+    numEl.textContent = (current + 1) + ' / ' + total;
+
+    var aside = slides[current].querySelector('aside');
+    notesEl.innerHTML = '';
+    var p = document.createElement('p');
+    p.textContent = aside ? aside.textContent : 'Sem notas neste slide.';
+    notesEl.appendChild(p);
+
+    history.replaceState(null, '', '#' + (current + 1));
+  }
+
+  function next() { show(current + 1); }
+  function prev() { show(current - 1); }
+
+  function toggleNotes() {
+    notesOn = !notesOn;
+    notesEl.hidden = !notesOn;
+    document.getElementById('notesBtn').textContent = notesOn ? 'Fechar notas (N)' : 'Notas (N)';
+  }
+
+  function toggleFull() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+    } else {
+      document.exitFullscreen && document.exitFullscreen();
+    }
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target && e.target.tagName === 'INPUT') return;
+    if (e.target && e.target.tagName === 'BUTTON' && (e.key === 'Enter' || e.key === ' ')) return;
+    switch (e.key) {
+      case 'ArrowRight': case 'PageDown': case ' ': e.preventDefault(); next(); break;
+      case 'ArrowLeft': case 'PageUp': e.preventDefault(); prev(); break;
+      case 'Home': show(0); break;
+      case 'End': show(total - 1); break;
+      case 'n': case 'N': toggleNotes(); break;
+      case 'f': case 'F': toggleFull(); break;
+    }
+  });
+
+  document.getElementById('prev').addEventListener('click', prev);
+  document.getElementById('next').addEventListener('click', next);
+  document.getElementById('notesBtn').addEventListener('click', toggleNotes);
+  document.getElementById('fullBtn').addEventListener('click', toggleFull);
+
+  function selectText(el) {
+    var r = document.createRange();
+    r.selectNodeContents(el);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(r);
+  }
+
+  document.querySelectorAll('.cmd').forEach(function (box) {
+    var pre = box.querySelector('pre');
+    if (!pre) return;
+    var b = document.createElement('button');
+    b.className = 'copy';
+    b.type = 'button';
+    b.textContent = 'Copiar';
+    b.addEventListener('click', function () {
+      var text = pre.innerText;
+      var done = function () { b.textContent = 'Copiado'; setTimeout(function () { b.textContent = 'Copiar'; }, 1600); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { selectText(pre); b.textContent = 'Selecione e copie'; });
+      } else {
+        selectText(pre);
+        b.textContent = 'Selecione e copie';
+      }
+    });
+    box.appendChild(b);
+  });
+
+  document.getElementById('deck').addEventListener('click', function (e) {
+    if (e.target.closest('button, a, .cmd, .out, .notes, .shot, img, table')) return;
+    if (window.matchMedia('(pointer: coarse)').matches) {
+      (e.clientX > window.innerWidth / 2) ? next() : prev();
+    }
+  });
+
+  var start = parseInt((location.hash || '').replace('#', ''), 10);
+  show(isNaN(start) ? 0 : start - 1);
+})();
+</script>
+</body>
+</html>
