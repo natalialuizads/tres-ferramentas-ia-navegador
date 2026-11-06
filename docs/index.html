@@ -50,6 +50,9 @@
   .lista li { margin: 0 0 10px; }
   .lista li::marker { content: "- "; color: var(--terra); font-weight: 700; }
   .nao { color: var(--terra); font-size: clamp(17px, 1.7vw, 25px); border-left: 3px solid var(--terra); padding-left: 14px; }
+  .pedido { font-size: clamp(15px, 1.5vw, 22px); line-height: 1.4; color: var(--ink); background: #EFE9DC; border-radius: 10px; padding: 10px 16px; margin: 0; }
+  .pedido b { font-size: clamp(11px, 1.05vw, 15px); letter-spacing: 1.4px; text-transform: uppercase; color: var(--terra); margin-right: 8px; }
+  .exemplo { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 
   .cmd { position: relative; background: var(--dark); color: var(--light); border-radius: 12px; padding: 14px 88px 14px 20px; }
   .dark .cmd { background: #11201A; border: 1px solid #3C5147; }
@@ -347,6 +350,7 @@ da página inteira.</pre></div>
   <section class="slide" data-title="O que ele devolve">
     <p class="eyebrow" style="color:var(--green)">Playwright MCP · na prática</p>
     <h2>Ela procura “Criar conta”. A página diz “Enviar”.</h2>
+    <p class="pedido"><b>Pedido</b> Abra /cadastro/ com o Playwright MCP, liste os campos e tire uma captura da página inteira.</p>
     <div class="center" style="--sh:46vh;--x:445;--y:108;--cw:550;--ch:742">
       <div>
         <p class="cap green-t">O design</p>
@@ -416,17 +420,23 @@ culpados pelo LCP.</pre></div>
   <section class="slide" data-title="Duas medições">
     <h2>A mesma página, medida duas vezes.</h2>
     <div class="row eq">
-      <div class="out">
-        <p class="lbl">Saída real · agent-browser vitals · sem limitação</p>
-        <pre>url: http://localhost:3000/lenta/
+      <div class="exemplo">
+        <p class="pedido"><b>Pedido</b> Meça /lenta/ com o Agent Browser e me dê os números das Web Vitals, sem limitar rede nem CPU.</p>
+        <div class="out">
+          <p class="lbl">Saída real · agent-browser vitals · sem limitação</p>
+          <pre>url: http://localhost:3000/lenta/
 ttfb: 1.7ms  fcp: 768ms
 <b>lcp: 768ms</b>   cls: 0</pre>
+        </div>
       </div>
-      <div class="out ruim">
-        <p class="lbl">Saída real · Chrome DevTools MCP · Slow 4G + CPU 4x</p>
-        <pre>url: http://localhost:3000/lenta/
+      <div class="exemplo">
+        <p class="pedido"><b>Pedido</b> Emule Slow 4G e CPU 4x, meça /lenta/ com recarga e diga os 3 maiores culpados pelo LCP.</p>
+        <div class="out ruim">
+          <p class="lbl">Saída real · Chrome DevTools MCP · Slow 4G + CPU 4x</p>
+          <pre>url: http://localhost:3000/lenta/
 <b>LCP: 20 040 ms</b>   CLS: 0,06
 cache ignorado, com recarga</pre>
+        </div>
       </div>
     </div>
     <p class="lead">Mesma página, mesma máquina, mesmo minuto: <b>768 ms</b> contra <b>20 segundos</b>.</p>
@@ -437,6 +447,7 @@ cache ignorado, com recarga</pre>
   <!-- 9 -->
   <section class="slide" data-title="Sem uma palavra">
     <h2>E é assim que o usuário vê, 1,3 segundo depois.</h2>
+    <p class="pedido"><b>Pedido</b> Emule Slow 4G e CPU 4x, recarregue /lenta/ e tire uma captura quando o primeiro segundo e meio tiver passado.</p>
     <img class="shot-full" style="--sh:52vh" src="img/lenta-esperando.png" alt="A página de produtos carregando em rede lenta: as imagens aparecem, mas nenhum texto está visível na tela">
     <p class="lead">O texto está todo na página. A fonte ainda não chegou — e foi pedida com <code>font-display: block</code>, que manda o navegador esconder o texto até lá.</p>
     <p class="muted">Captura real de <code>/lenta/</code> em Slow 4G e CPU 4x. Nem o nome da loja aparece. Sem limitação, essa tela nunca acontece no computador de quem desenvolve.</p>
@@ -446,6 +457,7 @@ cache ignorado, com recarga</pre>
   <!-- 10 -->
   <section class="slide" data-title="Onde foram os 20 s">
     <h2>E ele diz onde os 20 segundos foram.</h2>
+    <p class="pedido"><b>Pedido</b> Emule Slow 4G e CPU 4x, grave um trace de /lenta/ com recarga e diga em qual etapa o LCP foi gasto.</p>
     <div class="chart">
       <div class="bar" role="img" aria-label="Repartição do LCP de 20,04 segundos: resposta do servidor 5,68 s, atraso até pedir a imagem 5,01 s, download da imagem 9,31 s, desenho 0,05 s">
         <span style="background:var(--c1);width:28.3%" title="Resposta do servidor — 5,68 s">5,68 s</span>
@@ -470,6 +482,7 @@ cache ignorado, com recarga</pre>
   <!-- 10 -->
   <section class="slide" data-title="Antes e depois">
     <h2>Com o diagnóstico, o conserto.</h2>
+    <p class="pedido"><b>Pedido</b> Emule Slow 4G e CPU 4x, meça /lenta/ e /lenta-gabarito/ com recarga e compare LCP, requisições, imagens, chamadas à API, erros do console e CLS.</p>
     <div class="ab">
       <div class="ab-row">
         <span class="ab-name">/lenta/</span>
@@ -554,6 +567,7 @@ $ab click @e6</pre></div>
   <section class="slide" data-title="Duas sessões">
     <p class="eyebrow">Agent Browser · na prática</p>
     <h2>Dois logins ao mesmo tempo, sem logout no meio.</h2>
+    <p class="pedido"><b>Pedido</b> Com o Agent Browser, entre como Ana na sessão a e como Bruno na sessão b, e tire uma captura do painel de cada uma.</p>
     <div class="center" style="--sh:38vh;--x:75;--y:100;--cw:700;--ch:390">
       <div>
         <p class="cap terra-t">--session a</p>
@@ -572,6 +586,7 @@ $ab click @e6</pre></div>
   <!-- 13 -->
   <section class="slide" data-title="O erro das três">
     <h2>O mesmo erro, nas três ferramentas.</h2>
+    <p class="pedido"><b>Pedido nos dois casos</b> Entrar como Bruno na sessão b, com bruno@exemplo.com e senha teste123, e confirmar que o painel abriu.</p>
     <div class="row eq">
       <div class="out ruim">
         <p class="lbl">Saída real · agindo sem ler a página</p>
