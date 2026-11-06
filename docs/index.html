@@ -599,6 +599,25 @@ $ab click @e6</pre></div>
     <aside>Conte que o erro é seu, sem drama: você pulou o snapshot na sessão nova. É o erro que a turma vai cometer no laboratório, nas três ferramentas, e a correção é sempre a mesma linha. Pergunte por que o wait também falhou: porque o login nunca aconteceu.</aside>
   </section>
 
+  <!-- 14 -->
+  <section class="slide" data-title="Qual usar">
+    <h2>Qual usar.</h2>
+    <table>
+      <thead><tr><th style="width:56%">Quando a sua pergunta é…</th><th>A ferramenta é</th></tr></thead>
+      <tbody>
+        <tr><td>“A tela entregue bate com o design?”</td><td><b class="t-pw">Playwright MCP</b></td></tr>
+        <tr><td>“Esse formulário envia e confirma mesmo?”</td><td><b class="t-pw">Playwright MCP</b></td></tr>
+        <tr><td>“Por que isso demora tanto para o usuário?”</td><td><b class="t-dt">Chrome DevTools MCP</b></td></tr>
+        <tr><td>“O que exatamente está travando a renderização?”</td><td><b class="t-dt">Chrome DevTools MCP</b></td></tr>
+        <tr><td>“Roda esse fluxo com dois logins diferentes.”</td><td><b class="t-ab">Agent Browser</b></td></tr>
+        <tr><td>“Coloca isso num script que roda sozinho.”</td><td><b class="t-ab">Agent Browser</b></td></tr>
+      </tbody>
+    </table>
+    <p class="lead">Tarefa que mistura as três? A ordem é sempre <b>medir, corrigir, medir de novo</b>.</p>
+    <p class="muted">A quarta ideia, o WebMCP, vem no próximo slide.</p>
+    <aside>Faça ao contrário: leia só a coluna da esquerda e deixe a plateia responder. Se errarem, volte à tabela "As três, lado a lado". Sobre o WebMCP, seja honesto: é horizonte, não prática — vale conhecer o nome, não vale apostar.</aside>
+  </section>
+
   <!-- WebMCP -->
   <section class="slide" data-title="WebMCP: a página declara as ações">
     <p class="eyebrow" style="color:var(--muted)">Uma quarta ideia · experimental</p>
@@ -616,25 +635,6 @@ $ab click @e6</pre></div>
     </div>
     <p class="nao"><b>Fica fora do roteiro.</b> É para acompanhar, não para usar nesta aula.</p>
     <aside>Ligue ao slide 2: a IA não vê a tela, então precisa adivinhar. Com WebMCP, a página conta o que pode fazer. Mostre o comando e a resposta vazia. A flag não preenche a lista sozinha: uma página precisa registrar ações, então o vazio é esperado. Não prometa nada: é experimental e pode mudar.</aside>
-  </section>
-
-  <!-- 14 -->
-  <section class="slide" data-title="Qual usar">
-    <h2>Qual usar.</h2>
-    <table>
-      <thead><tr><th style="width:56%">Quando a sua pergunta é…</th><th>A ferramenta é</th></tr></thead>
-      <tbody>
-        <tr><td>“A tela entregue bate com o design?”</td><td><b class="t-pw">Playwright MCP</b></td></tr>
-        <tr><td>“Esse formulário envia e confirma mesmo?”</td><td><b class="t-pw">Playwright MCP</b></td></tr>
-        <tr><td>“Por que isso demora tanto para o usuário?”</td><td><b class="t-dt">Chrome DevTools MCP</b></td></tr>
-        <tr><td>“O que exatamente está travando a renderização?”</td><td><b class="t-dt">Chrome DevTools MCP</b></td></tr>
-        <tr><td>“Roda esse fluxo com dois logins diferentes.”</td><td><b class="t-ab">Agent Browser</b></td></tr>
-        <tr><td>“Coloca isso num script que roda sozinho.”</td><td><b class="t-ab">Agent Browser</b></td></tr>
-      </tbody>
-    </table>
-    <p class="lead">Tarefa que mistura as três? A ordem é sempre <b>medir, corrigir, medir de novo</b>.</p>
-    <p class="muted">A quarta ideia, o WebMCP, está no slide anterior.</p>
-    <aside>Faça ao contrário: leia só a coluna da esquerda e deixe a plateia responder. Se errarem, volte à tabela "As três, lado a lado". Sobre o WebMCP, seja honesto: é horizonte, não prática — vale conhecer o nome, não vale apostar.</aside>
   </section>
 
   <!-- Fontes -->
